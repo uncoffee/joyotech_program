@@ -3,8 +3,6 @@ import time
 import network
 import ntptime
 import urequests
-import utime
-
     
 def alarm(mode):
     getup = True
@@ -24,15 +22,16 @@ def alarm(mode):
                 getup = False
             
             else:
-                speaker.duty_u16(65536//2)
                 time.sleep(0.5)
                 speaker.duty_u16(0)
                 time.sleep(0.5)
+                speaker.duty_u16(65536//2)
     
     elif mode == "single":
-        speaker.freq(1000)
+        speaker.freq(500)
         time.sleep(0.5)
         speaker.duty_u16(0)
+        time.sleep(0.5)
         
         
             
@@ -50,20 +49,20 @@ def check_timer():
         alarm("getup")
         
     site.close()#必要のない情報を捨てる。
-    print(set_t)
+  #  print(set_t)
     set_d = int(set_t[0])
     set_h = int(set_t[1])
     set_m = int(set_t[2].replace('\n',' '))
-    print(set_m)
+  #  print(set_m)
     
     now_t = time.gmtime(time.time())
-    print(now_t)
+  #  print(now_t)
     now_d = now_t[2]
     now_h = now_t[3]
     now_m = now_t[4]
     now_s = now_t[5]
         
-    print(now_d,now_h,now_m,now_s,'|',set_d,set_h,set_m)
+ #   print(now_d,now_h,now_m,now_s,'|',set_d,set_h,set_m)
     
     if not now_s == 0 and set_m > now_m:
         return False , 60 - now_s
@@ -83,13 +82,15 @@ def check_connect(url):
     site.close()#必要のない情報を捨てる。
     alarm("single")
     
-    ntptime.host = "ntp.nict.jp"#時間取得先のIP
+    ntptime.host = 'ntp.nict.jp'#時間取得先のIP
     ntptime.settime()
-    pico_time = utime.localtime(utime.time() + 9 * 3600)
-    if pico_time[0] >= 2025:
-        alarm("single")
+    alarm("single")
 
     
+    
+    
+alarm("single")
+alarm("single")
     
     
 #学校のWiFi  ssid:system         | key:systemken 
@@ -125,3 +126,17 @@ if run:
             time.sleep(sleep_time)
         
     alarm("getup")
+        
+        
+    
+    
+        
+
+        
+        
+    
+
+
+
+
+
