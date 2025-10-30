@@ -1,0 +1,127 @@
+import machine
+import time
+import network
+import ntptime
+import urequests
+import utime
+
+    
+def alarm(mode):
+    getup = True
+
+    led = machine.Pin(28, machine.Pin.IN, machine.Pin.PULL_UP)
+    bus = machine.Pin(27, machine.Pin.OUT)
+
+    speaker = machine.PWM(bus)
+    speaker.duty_u16(65536//2)
+    
+    if mode == "getup":
+        speaker.freq(2000)
+        
+        while getup:
+            
+            if led.value() == 0:
+                getup = False
+            
+            else:
+                speaker.duty_u16(65536//2)
+                time.sleep(0.5)
+                speaker.duty_u16(0)
+                time.sleep(0.5)
+    
+    elif mode == "single":
+        speaker.freq(1000)
+        time.sleep(0.5)
+        speaker.duty_u16(0)
+        
+        
+            
+
+            
+            
+def check_timer():
+    site = urequests.get(url)#スクレイピングを行う。
+          
+    if site.status_code == 200:#問題なくスクレイピングが出来れば値が200になる。
+        set_t = site.text
+        set_t = set_t.split(',')
+        
+    else:
+        alarm("getup")
+        
+    site.close()#必要のない情報を捨てる。
+    print(set_t)
+    set_d = int(set_t[0])
+    set_h = int(set_t[1])
+    set_m = int(set_t[2].replace('\n',' '))
+    print(set_m)
+    
+    now_t = time.gmtime(time.time())
+    print(now_t)
+    now_d = now_t[2]
+    now_h = now_t[3]
+    now_m = now_t[4]
+    now_s = now_t[5]
+        
+    print(now_d,now_h,now_m,now_s,'|',set_d,set_h,set_m)
+    
+    if not now_s == 0 and set_m > now_m:
+        return False , 60 - now_s
+        
+    if set_d <= now_d and set_h <= now_h and set_m <= now_m:
+        return True , 0
+    
+    else:
+        return False , 60
+        
+    
+    
+def check_connect(url):
+    
+    
+    site = urequests.get(url)#スクレイピングを行う。     
+    site.close()#必要のない情報を捨てる。
+    alarm("single")
+    
+    ntptime.host = "ntp.nict.jp"#時間取得先のIP
+    ntptime.settime()
+    pico_time = utime.localtime(utime.time() + 9 * 3600)
+    if pico_time[0] >= 2025:
+        alarm("single")
+
+    
+    
+    
+#学校のWiFi  ssid:system         | key:systemken 
+#家のWiFi　  ssid:aterm-433771-g | key:84117366
+#my sim     ssid:蒲焼さん太郎     | key:soutakami
+            
+            
+#wifiのssid(名前),key(パスワード)を設定する。
+ssid = '蒲焼さん太郎'
+key = 'soutakami'
+
+#時間設定用にしたgithubのurl
+url = 'https://uncoffee.github.io/-/time.txt'
+
+sleep_mode = True
+run = True
+
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+wlan.connect(ssid, key)
+
+check_connect(url)
+    
+if run:
+    while sleep_mode:
+        boot , sleep_time = check_timer()
+        print(boot,sleep_time)
+        
+        if boot:
+            sleep_mode = False
+            
+        else:
+            time.sleep(sleep_time)
+        
+    alarm("getup")
