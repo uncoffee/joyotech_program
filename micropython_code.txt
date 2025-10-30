@@ -91,16 +91,12 @@ def check_connect(url):
     
 alarm("single")
 alarm("single")
-    
-    
-#学校のWiFi  ssid:system         | key:systemken 
-#家のWiFi　  ssid:aterm-433771-g | key:84117366
-#my sim     ssid:蒲焼さん太郎     | key:soutakami
+
             
             
 #wifiのssid(名前),key(パスワード)を設定する。
-ssid = '蒲焼さん太郎'
-key = 'soutakami'
+ssid = ''
+key = ''
 
 #時間設定用にしたgithubのurl
 url = 'https://uncoffee.github.io/-/time.txt'
